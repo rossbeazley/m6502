@@ -3,23 +3,39 @@
 ; plot all pixels incrementing the colour
 
 ; reset colour and video memory address
+
+; store 16bit $0500 at address $8
+ldx #$5
+stx $9
+ldx #$0
+stx $8
+
+
+;store colour $f into X
 ldx #$f
+
+;store pixel offset Y
 ldy #$ff
 
 plotpixel:
  txa
- sta $0200,y
+ sta ($8),y ; blit X into address Y offset from pointer in $8
 
 ; next colour
  dex
- cpx #0         ; if colour > 0
+                ; if colour > 0
  bne nextpixel  ; move to next pixel
- lda #$f        ; else reset colour then next pixel
+ ldx #$f         ; else reset colour then next pixel
 
 nextpixel:
  dey
- cpy #$0
- beq end 
+ bne movenextpixel
+; y is $0
+ dec $9 
+ beq end
+
+movenextpixel:
+ 
  jmp plotpixel
 
 end:
