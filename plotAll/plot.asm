@@ -1,6 +1,4 @@
-; plots ONE pixel
 ; $200 (top left corner) to $5ff
-; plot all pixels incrementing the colour
 
 ; reset colour and video memory address
 
@@ -12,31 +10,37 @@ stx $8
 
 
 ;store colour $f into X
-ldx #$f
+ldx palletlength
 
 ;store pixel offset Y
 ldy #$ff
 
 plotpixel:
- txa
+ lda pallet,x
  sta ($8),y ; blit X into address Y offset from pointer in $8
 
 ; next colour
  dex
                 ; if colour > 0
  bne nextpixel  ; move to next pixel
- ldx #$f         ; else reset colour then next pixel
+ ldx palletlength         ; else reset colour then next pixel
 
 nextpixel:
  dey
  bne movenextpixel
-; y is $0
- dec $9 
- beq end
+ ldy #$ff
+ dec $9
+ lda $9
+ cmp #$1 
+ bne movenextpixel
+ lda #$5
+ sta $9
 
-movenextpixel:
- 
- jmp plotpixel
 
-end:
- 
+movenextpixel: jmp plotpixel
+
+pallet:
+ dcb 1,$f,$c,$b,0,2,$a,8,7,3,$d,5,$e,6,4,9
+
+palletlength:
+ dcb $e 
